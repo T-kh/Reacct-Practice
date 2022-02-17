@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/styles.css">
+  <title>React</title>
+  
+  <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+<script type="text/babel">
+
+  (() => {
+    function Counter(props) {
+      return (
+                                                           //App Cpmponent で押されたCounter Componentのidを1増やしたいので、countUp(props.counter)として値を返す
+        <li style={{backgroundColor:props.counter.color}} onClick={() => props.countUp(props.counter)}>
+          {props.counter.id}:{props.counter.count}
+        </li>
+      );
+    }
+  
+    function CounterList(props) {
+      const counters = props.counters.map(counter => { //{counter}はpropsの一つ一つ props入れない
+        return (
+          <Counter
+          counter={counter}  
+          key={counter.id}
+          countUp={props.countUp}/>
+        );
+      });
+  
+      return (
+        <ul>
+          {counters}
+        </ul>
+      );
+    }
+  
+    class App extends React.Component {
+      constructor() {
+        super();
+        this.state = {
+          counters: [
+            {id: 'A', count: 0, color: 'tomato'},
+            {id: 'B', count: 0, color: 'skyblue'},
+            {id: 'C', count: 0, color: 'limegreen'},
+            {id: 'D', count: 0, color: 'pink'},
+            {id: 'E', count: 0, color: 'gray'},
+            {id: 'F', count: 0, color: 'yellow'},
+          ],
+          total: 0
+        };
+        this.countUp = this.countUp.bind(this);
+      }
+  
+      countUp(counter) { //引数counterはCounter Componentのreturnで返されたものを受け取る。返されるのは押されたCounter Componentの「id, count, color」
+        this.setState(prevState => {
+
+          const counters = prevState.counters.map(counter => { //引数counterはオブジェクト。変化前のthis.state,countersのコピーを各々のインデックスで作りそれをまとめて定数countersに渡す
+            return {id: counter.id, count: counter.count, color: counter.color};   //とりあえず1増やす前の値のコピーを全てのkeyに対して作っておく
+          });
+
+          //押されたidの検索
+          const pos = counters.map(counter => {
+            return counter.id;       //indexOfで呼び出されるので、押されたcounter.idをreturnで返す
+          }).indexOf(counter.id);    //infexOfで返されたcounter.idがthis.state.counters配列の何番目かを特定する
+
+          counters[pos].count++;     //posには押されたComponentがthis.state.countersの何番目で作られているかが返されるので、定数counters（配列）でpos番目のcountに対して1ずつ増やす
+
+          return {
+            counters: counters,       //countersのkeyに、処理を行った定数countersを返してあげる。 counters keyはprevState.countersでthis.state.countersを指すので取得できている
+            total: prevState.total + 1  //setState(prevState => ) と書いている時点で変化前のthis.stateを取得できているので、prevState.total + 1をtotal keyに返すことができる
+          };
+
+        });
+      }
+      render() {
+        return (
+          <div className="container">
+            <CounterList
+            counters={this.state.counters}
+            countUp={this.countUp}/>
+            <div>TOTAL INVENTORY: {this.state.total}</div>
+          </div>
+        );
+      }
+    }
+  
+    ReactDOM.render(
+      <App/>,
+      document.getElementById('root')
+    )
+
+  })();
+  
+
+</script>
+</body>
+</html>
+
